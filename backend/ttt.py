@@ -7,11 +7,12 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
+global documents
 
 data_parser = DataParser("yelp_academic_dataset_business.json")
 data_parser.load_data()
 documents = data_parser.get_documents()
-scorer = VSMScorer(title_weight=0.1, body_weight=0.9)
+scorer = VSMScorer(data_parser.idfs, title_weight=0.1, body_weight=0.9)
 
 @app.route('/recommend', methods=['POST'])
 def recommend():
