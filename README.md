@@ -11,11 +11,14 @@ Download Yelp dataset [here](https://drive.google.com/file/d/1mOZ_jOjeHZTZHkbj4b
    git clone https://github.com/mu-sajid/BiteFinder.git
    cd BiteFinder
 
-2. **Install the necessary Python packages**:
+2. **Download Yelp Dataset**
+   Extract 'yelp_academic_dataset_business.json' to backend folder.
+
+3. **Install the necessary Python packages**:
    ```bash
     pip install flask flask-cors
 
-3. **Run backend server**:
+4. **Run backend server**:
    ```bash
     python backend/app.py
 
