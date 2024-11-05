@@ -11,7 +11,7 @@ Download Yelp dataset [here](https://drive.google.com/file/d/1mOZ_jOjeHZTZHkbj4b
    git clone https://github.com/mu-sajid/BiteFinder.git
    cd BiteFinder
 
-2. **Download Yelp Dataset**
+2. **Download Yelp Dataset**:\
    Extract 'yelp_academic_dataset_business.json' to backend folder.
 
 3. **Install the necessary Python packages**:
