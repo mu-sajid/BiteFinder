@@ -1,5 +1,6 @@
 class VSMScorer:
-    def __init__(self, title_weight=0.1, body_weight=0.9):
+    def __init__(self, idfs, title_weight=0.1, body_weight=0.9):
+        self.idfs = idfs
         self.title_weight = title_weight
         self.body_weight = body_weight
 
@@ -30,10 +31,23 @@ class VSMScorer:
         for term in text.lower().split():
             tf[term] = tf.get(term, 0) + 1
         return tf
+    
+    def get_q_tf(self, text): 
+        if text is None:
+            text = ""
+        tf = {}
+        for term in text.lower().split():
+            tf[term] = tf.get(term, 0) + 1
+        
+        for term in tf.keys():
+            idf = self.idfs.get(term)
+            if idf is not None:
+                tf[term] *= idf
+        return tf
 
     def calculate_similarity(self, query, document):
         # Prepare term frequencies for query and document
-        tf_query = self.get_tf(query)
+        tf_query = self.get_q_tf(query)
         title_text = document.get("name", "") or ""
         body_text = document.get("categories", "") or ""
         
