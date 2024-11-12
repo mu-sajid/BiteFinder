@@ -1,6 +1,6 @@
 # BiteFinder
 A restaurant recommendation system with a backend in Python and a frontend in React.  
-Download Yelp dataset [here](https://drive.google.com/file/d/1mOZ_jOjeHZTZHkbj4bT7fqjotMiIKjbh/view?usp=sharing)
+Download Yelp dataset [here](https://www.yelp.com/dataset)
 
 
 ## Backend Setup
