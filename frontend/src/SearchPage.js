@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import GooglePlacesAutocomplete from 'react-google-places-autocomplete';
 import './SearchPage.css';
+import {loadGoogleMapsAPI} from './LoadGoogle'
 
 const SearchPage = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [location, setLocation] = useState(null);
+  const [geolocation, setGeoLocation] = useState(null);
+  const API_KEY = process.env.REACT_APP_GCLOUD_API
 
   const handleQueryChange = (e) => {
     setQuery(e.target.value);
@@ -16,7 +21,14 @@ const SearchPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.post('http://127.0.0.1:5000/recommend', { query });
+      console.log(geolocation);
+      const data = {
+        query: JSON.stringify(query),
+        lat: JSON.stringify(geolocation['lat']),
+        lng: JSON.stringify(geolocation['lng'])
+      }
+      console.log(data);
+      const response = await axios.post('http://127.0.0.1:5000/recommend', { data });
       setResults(response.data);
     } catch (err) {
       setError('Error fetching recommendations');
@@ -26,11 +38,37 @@ const SearchPage = () => {
     }
   };
 
+  const handleUpdateLocation = async (newLocation) => {
+    setLocation(newLocation);
+    loadGoogleMapsAPI(API_KEY, ["places"]).then(async(google) => {
+      console.log("Google Maps API loaded:", google);
+      const { Place } = await google.maps.importLibrary("places");
+      const place = new Place({
+        id: newLocation['value']['place_id'],
+        requestedLanguage: "en",
+      });
+      await place.fetchFields({
+        fields: ["displayName", "location"],
+      });
+      console.log(place['Eg']['location']);
+      setGeoLocation(place['Eg']['location'])
+    });
+  }
   return (
     <div className="search-page">
       <header>
+
         <h1>Bite Finder</h1>
-        <div className="location">Location: College Station</div>
+        <div className="location">
+          <GooglePlacesAutocomplete
+          apiKey={API_KEY}
+          selectProps={{
+              location,
+              onChange: handleUpdateLocation,
+              placeholder:"Enter your location...",
+            }}
+          />
+        </div>
       </header>
 
       <div className="search-bar">

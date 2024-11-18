@@ -18,6 +18,10 @@ scorer = VSMScorer(data_parser.idfs, title_weight=0.1, body_weight=0.9)
 def recommend():
     data = request.json
     query = data.get('query', '')
+    #location_lat = data.get('lat', '')
+    #location_lng = data.get('lng', '')
+    #send Nearby Request with latitude and longitude
+    #construct documents out of those place, pass them through scorer as done below
 
     # Calculate recommendations based on query
     results = []

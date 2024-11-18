@@ -33,6 +33,7 @@
   .location {
     font-size: 14px;
     color: #555;
+    min-width: 300px;
   }
   
   .search-bar {
