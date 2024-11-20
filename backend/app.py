@@ -2,7 +2,9 @@ from flask import Flask, request, jsonify
 from vsm_scorer import VSMScorer
 from data_parser import DataParser
 from flask_cors import CORS
-
+from dotenv import load_dotenv
+import os
+import requests
 
 app = Flask(__name__)
 CORS(app)
@@ -11,23 +13,32 @@ global documents
 
 data_parser = DataParser("yelp_academic_dataset_business.json")
 data_parser.load_data()
-documents = data_parser.get_documents()
-scorer = VSMScorer(data_parser.idfs, title_weight=0.1, body_weight=0.9)
+#documents = data_parser.get_documents()
+scorer = VSMScorer(data_parser.idfs, title_weight=0.5, body_weight=0.5)
+
+load_dotenv()
+API_KEY = os.getenv('GCLOUD_API')
 
 @app.route('/recommend', methods=['POST'])
 def recommend():
     data = request.json
-    query = data.get('query', '')
-    
-    #location_lat = data.get('lat', '')
-    #location_lng = data.get('lng', '')
-    #range = data.get('rng', '')
-    search_range = 50
-    location_lat = 37.7937
-    location_lng = -122.3965
+    data2 = data.get('data')
+    query = data2.get('query', '')
+    location_lat = data2.get('lat', '')
+    location_lng = data2.get('lng', '')
+    #search_range = data.get('rng', '')
+    search_range = 5000.0
+
+    url = "https://places.googleapis.com/v1/places:searchNearby"
+    headers = {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": "AIzaSyClWMr2VJak7tmqlDcJlvt8SN28BuQl8P4",  # Replace with your actual API key
+        "X-Goog-FieldMask": "places.displayName,places.types"
+    }
+
     data = {
         "includedTypes": ["restaurant"],
-        "maxResultCount": 100,
+        "maxResultCount": 20,
         "locationRestriction": {
             "circle": {
                 "center": {
@@ -38,18 +49,26 @@ def recommend():
             }
         }
     }
-    endpoint = 'https://places.googleapis.com/v1/places:searchNearby'
-    headers = {
-        'Content-Type': 'application/json',
-        'X-Goog-Api-Key': ,
-        'X-Goog-FieldMask': 'places.displayName.text, places.types, places.editorialSummary.text, places.regularOpeningHours.openNow, places.priceLevel'
-    }
-    response = requests.post(endpoint, headers=headers, json=data)
-    
-    if response.status_code == 200:
-        return jsonify(response.json())
-    else:
-        return jsonify({'error': 'Failed to retrieve data', 'status_code': response.status_code}), response.status_code
+
+    places_result = requests.post(url, headers=headers, json=data).json()
+    # Print the results
+    documents = []
+    for place in places_result['places']:
+        #print(place['opening_hours']['open_now'])
+        formatted_places = [place.replace('_', ' ').title() for place in place['types']]
+        if len(formatted_places) > 1:
+            formatted_string = ', '.join(formatted_places[:-1]) + f", and {formatted_places[-1]}"
+        else:
+            formatted_string = formatted_places[0]
+        
+#        print(place['displayName']['text'])
+#        print(formatted_string)
+
+        documents.append({
+                "name": place['displayName']['text'],
+                "categories": formatted_string
+            })
+
     #construct documents out of those place, pass them through scorer as done below
 
     # Calculate recommendations based on query

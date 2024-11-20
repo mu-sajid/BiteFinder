@@ -21,13 +21,13 @@ const SearchPage = () => {
     setLoading(true);
     setError(null);
     try {
-      console.log(geolocation);
+      // console.log(geolocation);
       const data = {
         query: JSON.stringify(query),
         lat: JSON.stringify(geolocation['lat']),
         lng: JSON.stringify(geolocation['lng'])
       }
-      console.log(data);
+      // console.log(data);
       const response = await axios.post('http://127.0.0.1:5000/recommend', { data });
       setResults(response.data);
     } catch (err) {
@@ -50,7 +50,6 @@ const SearchPage = () => {
       await place.fetchFields({
         fields: ["displayName", "location"],
       });
-      console.log(place['Eg']['location']);
       setGeoLocation(place['Eg']['location'])
     });
   }

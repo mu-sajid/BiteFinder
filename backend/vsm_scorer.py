@@ -16,9 +16,10 @@ class VSMScorer:
         tf_body = tfs.get("body", {})
 
         for term, q_weight in tf_query.items():
+            print(term, q_weight)
             tf_d_t = tf_title.get(term, 0.0)
             tf_d_b = tf_body.get(term, 0.0)
-
+            print(tf_title, tf_d_t)
             doc_weight = (self.title_weight * tf_d_t) + (self.body_weight * tf_d_b)
             score += q_weight * doc_weight
 
