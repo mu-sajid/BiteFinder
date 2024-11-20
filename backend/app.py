@@ -32,7 +32,7 @@ def recommend():
     url = "https://places.googleapis.com/v1/places:searchNearby"
     headers = {
         "Content-Type": "application/json",
-        "X-Goog-Api-Key": "AIzaSyClWMr2VJak7tmqlDcJlvt8SN28BuQl8P4",  # Replace with your actual API key
+        "X-Goog-Api-Key": API_KEY,  # Replace with your actual API key
         "X-Goog-FieldMask": "places.displayName,places.types"
     }
 
