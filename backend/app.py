@@ -24,52 +24,42 @@ def recommend():
     data = request.json
     data2 = data.get('data')
     query = data2.get('query', '')
-    location_lat = data2.get('lat', '')
-    location_lng = data2.get('lng', '')
-    #search_range = data.get('rng', '')
-    search_range = 5000.0
+    location_lat = float(data2.get('lat', 0))  # Convert to float
+    location_lng = float(data2.get('lng', 0))
+    search_range = 5000.0  # 5km radius
 
-    url = "https://places.googleapis.com/v1/places:searchNearby"
-    headers = {
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": API_KEY,  # Replace with your actual API key
-        "X-Goog-FieldMask": "places.displayName,places.types"
+    # Correct Places API Endpoint
+    url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+    params = {
+        "location": f"{location_lat},{location_lng}",
+        "radius": search_range,
+        "type": "restaurant",
+        "keyword": query,
+        "key": API_KEY
     }
 
-    data = {
-        "includedTypes": ["restaurant"],
-        "maxResultCount": 20,
-        "locationRestriction": {
-            "circle": {
-                "center": {
-                    "latitude": location_lat,
-                    "longitude": location_lng
-                },
-                "radius": search_range
-            }
-        }
-    }
+    # Fetch places from Google Places API
+    places_result = requests.get(url, params=params).json()
 
-    places_result = requests.post(url, headers=headers, json=data).json()
-    # Print the results
+    # Parse results into documents
     documents = []
-    for place in places_result['places']:
-        #print(place['opening_hours']['open_now'])
-        formatted_places = [place.replace('_', ' ').title() for place in place['types']]
-        if len(formatted_places) > 1:
-            formatted_string = ', '.join(formatted_places[:-1]) + f", and {formatted_places[-1]}"
-        else:
-            formatted_string = formatted_places[0]
-        
-#        print(place['displayName']['text'])
-#        print(formatted_string)
+    seen_names = set()  # Track unique names
+    if "results" in places_result:
+        for place in places_result['results']:
+            name = place.get('name', "Unknown")
+            if name in seen_names:
+                continue  # Skip duplicates
+            seen_names.add(name)
 
-        documents.append({
-                "name": place['displayName']['text'],
-                "categories": formatted_string
+            # Format types into categories
+            types = place.get('types', [])
+            formatted_places = [ptype.replace('_', ' ').title() for ptype in types]
+            formatted_string = ', '.join(formatted_places)
+
+            documents.append({
+                "name": name,
+                "categories": formatted_string,
             })
-
-    #construct documents out of those place, pass them through scorer as done below
 
     # Calculate recommendations based on query
     results = []
@@ -83,8 +73,9 @@ def recommend():
         {"name": name, "categories": categories, "score": score}
         for name, categories, score in results
     ]
-    
+
     return jsonify(recommendations)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
