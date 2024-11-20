@@ -28,7 +28,7 @@ const SearchPage = () => {
         lat: geolocation?.lat || 0,
         lng: geolocation?.lng || 0,
       };
-      const response = await axios.post('http://127.0.0.1:5000/recommend', { data });
+      const response = await axios.post('https://backendbitefinder-ad6c593f7e29.herokuapp.com/recommend', { data });
       setResults(response.data);
     } catch (err) {
       setError('Error fetching recommendations');
